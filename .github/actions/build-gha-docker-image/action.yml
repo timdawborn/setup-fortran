@@ -33,13 +33,19 @@ runs:
         username: ${{ inputs.docker-registry-username }}
         password: ${{ inputs.docker-registry-password }}
 
+    - name: 'Construct long-form docker tag'
+      id: long-form-tag
+      run: |
+        echo "type=raw,value=${{ inputs.compiler-name }}-${{ inputs.compiler-version }}-pr-${{ github.event.number }}" >> "${GITHUB_OUTPUT}"
+
     - name: "Extract metadata (tags, labels) for docker"
       id: meta
       uses: docker/metadata-action@v5
       with:
         images: ${{ inputs.docker-registry-name }}/${{ inputs.image-name }}
         tags: |
-          type=raw,value=linux-${{ inputs.compiler-name }}-${{ inputs.compiler-version }}
+          ${{ steps.long-form-tag.outputs.tag }}
+          type=raw,value=${{ inputs.compiler-name }}-${{ inputs.compiler-version }}
           type=sha
           type=ref,enable=true,priority=600,prefix=,suffix=,event=branch
           type=ref,enable=true,priority=600,prefix=,suffix=,event=tag
