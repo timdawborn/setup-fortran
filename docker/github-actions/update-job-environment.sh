@@ -1,7 +1,7 @@
 #!/bin/bash
 # This script is to be run within a GitHub Action job step, and is used to update the runtime
 # environment variables based on environment variables setup during build time.
-set -uex
+set -ue
 
 D=/etc/github-actions
 
