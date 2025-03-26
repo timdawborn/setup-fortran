@@ -56,8 +56,8 @@ jobs:
         run: echo "${{ toJSON(fromJSON(steps.matrix.outputs.matrix)) }}"
 
 
-  build-and-push-docker-image:
-    name: 'Build and push docker image'
+  build-gha-docker-images:
+    name: 'Build and push GHA docker image'
     runs-on: ubuntu-latest
     timeout-minutes: 12
     permissions:
@@ -88,7 +88,37 @@ jobs:
           docker-registry-password: ${{ secrets.GITHUB_TOKEN }}
           image-name: ${{ github.repository }}
 
-    
+  test-gha-docker-images:
+    name: 'Test GHA docker image'
+    needs:
+      - options
+      - build-gha-docker-images
+    continue-on-error: ${{ needs.options.outputs.mode == 'report' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - compiler-name: 'gcc'
+            compiler-version: '13'
+    container:
+      image: ghcr.io/relan-software/relan:linux-${{ matrix.compiler-name }}-${{ matrix.compiler-version }},pr-${{ github.event.number }}
+    steps:
+      - name: 'Checkout repository'
+        uses: actions/checkout@v4
+
+      - name: 'Setup environment'
+        run: /etc/github-actions/update-job-environment.sh
+
+      - name: 'Test the installed compilers'
+        if: steps.setup-fortran.outcome == 'success'
+        uses: ./.github/actions/test
+        with:
+          compiler-name: ${{ matrix.compiler-name }}
+          compiler-version: ${{ matrix.compiler-version }}
+          output-mode: ${{ needs.options.outputs.mode }}
+#    
 #  test:
 #    name: Test
 #    needs: options
@@ -112,28 +142,13 @@ jobs:
 #      # - name: Debug with tmate
 #      #   uses: mxschmitt/action-tmate@v3
 #
-#      - name: Test Fortran compiler
+#      - name: 'Test the installed compilers'
 #        if: steps.setup-fortran.outcome == 'success'
-#        uses: ./.github/actions/test-fc
+#        uses: ./.github/actions/test
 #        with:
-#          compiler: ${{ matrix.toolchain.compiler }}
-#          version: ${{ matrix.toolchain.version }}
-#      
-#      - name: Test C compiler
-#        continue-on-error: true
-#        if: needs.options.outputs.mode == 'report' && steps.setup-fortran.outcome == 'success'
-#        uses: ./.github/actions/test-cc
-#        with:
-#          compiler: ${{ matrix.toolchain.compiler }}
-#          version: ${{ matrix.toolchain.version }}
-#      
-#      - name: Test C++ compiler
-#        continue-on-error: true
-#        if: needs.options.outputs.mode == 'report' && steps.setup-fortran.outcome == 'success'
-#        uses: ./.github/actions/test-cxx
-#        with:
-#          compiler: ${{ matrix.toolchain.compiler }}
-#          version: ${{ matrix.toolchain.version }}
+#          compiler-name: ${{ matrix.toolchain.compiler }}
+#          compiler-version: ${{ matrix.toolchain.version }}
+#          output-mode: ${{ needs.options.outputs.mode }}
 #
 #      - name: Create compatibility report
 #        if: needs.options.outputs.mode == 'report'
