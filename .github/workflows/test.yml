@@ -72,8 +72,11 @@ jobs:
           - compiler-name: 'gcc'
             compiler-version: '13'
     steps:
-      - name: "Checkout repository"
+      - name: 'Checkout repository'
         uses: actions/checkout@v4
+
+      - name: 'Copy setup-fortran to docker directory'
+        run: cp main.sh setup-fortran.sh docker/github-actions/
 
       - name: 'Build and push docker image'
         uses: ./.github/actions/build-gha-docker-image

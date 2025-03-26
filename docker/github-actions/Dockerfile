@@ -13,7 +13,6 @@ RUN mkdir -p /etc/github-actions
 COPY --chmod=755 ./update-job-environment.sh /etc/github-actions/update-job-environment.sh
 
 # Install the specified Fortran compiler.
-COPY --follow-symlinks ./main.sh /tmp/main.sh
-COPY --follow-symlinks ./setup-fortran.sh /tmp/setup-fortran.sh
+COPY ./main.sh ./setup-fortran.sh /tmp/
 COPY --chmod=755 ./run-setup-fortran.sh /tmp/run-setup-fortran.sh
 RUN env GITHUB_ENV=/etc/github-actions/ENV GITHUB_PATH=/etc/github-actions/PATH /tmp/run-setup-fortran.sh
