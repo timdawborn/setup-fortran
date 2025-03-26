@@ -37,7 +37,7 @@ runs:
       id: long-form-tag
       shell: bash
       run: |
-        echo "tag=type=raw,value=${{ inputs.compiler-name }}-${{ inputs.compiler-version }}-pr-${{ github.event.number }}" >> "${GITHUB_OUTPUT}"
+        echo "tag=type=raw,value=linux-${{ inputs.compiler-name }}-${{ inputs.compiler-version }}-pr-${{ github.event.number }}" >> "${GITHUB_OUTPUT}"
 
     - name: "Extract metadata (tags, labels) for docker"
       id: meta
