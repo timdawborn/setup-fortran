@@ -103,7 +103,7 @@ jobs:
           - compiler-name: 'gcc'
             compiler-version: '13'
     container:
-      image: ghcr.io/relan-software/relan:linux-${{ matrix.compiler-name }}-${{ matrix.compiler-version }}-pr-${{ github.event.number }}
+      image: ghcr.io/${{ github.repository }}:linux-${{ matrix.compiler-name }}-${{ matrix.compiler-version }}-pr-${{ github.event.number }}
     steps:
       - name: 'Checkout repository'
         uses: actions/checkout@v4
