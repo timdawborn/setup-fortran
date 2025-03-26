@@ -112,7 +112,6 @@ jobs:
         run: /etc/github-actions/update-job-environment.sh
 
       - name: 'Test the installed compilers'
-        if: steps.setup-fortran.outcome == 'success'
         uses: ./.github/actions/test
         with:
           compiler-name: ${{ matrix.compiler-name }}
