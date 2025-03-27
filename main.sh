@@ -9,7 +9,7 @@ if [[ "$RUNNER_OS" == "macOS" ]] && [[ "$compiler" == "intel" ]]; then
   compiler="intel-classic"
 fi
 
-source ./setup-fortran.sh
+source $(dirname ${0})/setup-fortran.sh
 
 case $compiler in
   gcc)
