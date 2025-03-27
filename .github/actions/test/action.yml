@@ -1,0 +1,38 @@
+name: 'Test setup-fortran ran correctly'
+description: 'Checks the system after setup-fortran has run.'
+
+inputs:
+  compiler-name:
+    description: 'The Fortran compiler installed.'
+    required: true
+  compiler-version:
+    description: 'The compiler version installed.'
+    required: true
+  output-mode:
+    description: 'The output mode of CI.'
+    required: true
+
+runs:
+  using: 'composite'
+  steps:
+    - name: 'Test Fortran compiler'
+      uses: ./.github/actions/test-fc
+      with:
+        compiler: ${{ inputs.compiler-name }}
+        version: ${{ inputs.compiler-version }}
+
+    - name: 'Test C compiler'
+      continue-on-error: true
+      if: inputs.output-mode == 'report'
+      uses: ./.github/actions/test-cc
+      with:
+        compiler: ${{ inputs.compiler-name }}
+        version: ${{ inputs.compiler-version }}
+
+    - name: 'Test C++ compiler'
+      continue-on-error: true
+      if: inputs.output-mode == 'report'
+      uses: ./.github/actions/test-cxx
+      with:
+        compiler: ${{ inputs.compiler-name }}
+        version: ${{ inputs.compiler-version }}
