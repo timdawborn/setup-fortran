@@ -2,6 +2,14 @@
 
 set -ex
 
+export_environment_variable()
+{
+  # Export the environment variable into the current shell.
+  export $1=$2
+  # Export the environment variable for future shells.
+  echo "${1}=${2}" >> "${GITHUB_ENV}"
+}
+
 require_fetch()
 {
   if command -v curl > /dev/null 2>&1; then
@@ -153,26 +161,24 @@ install_gcc()
       ;;
   esac
 
-  export FC="gfortran"
-  export CC="gcc"
-  export CXX="g++"
+  export_environment_variable FC 'gfortran'
+  export_environment_variable CC 'gcc'
+  export_environment_variable CXX 'g++'
 }
 
 export_intel_vars()
 {
-  cat >> $GITHUB_ENV <<EOF
-LD_LIBRARY_PATH=$LD_LIBRARY_PATH
-LIBRARY_PATH=$LIBRARY_PATH
-INFOPATH=$INFOPATH
-MANPATH=$MANPATH
-ONEAPI_ROOT=$ONEAPI_ROOT
-CLASSPATH=$CLASSPATH
-CMAKE_PREFIX_PATH=$CMAKE_PREFIX_PATH
-OCL_ICD_FILENAMES=$OCL_ICD_FILENAMES
-INTEL_PYTHONHOME=$INTEL_PYTHONHOME
-CPATH=$CPATH
-SETVARS_COMPLETED=$SETVARS_COMPLETED
-EOF
+  export_environment_variable LD_LIBRARY_PATH "$LD_LIBRARY_PATH"
+  export_environment_variable LIBRARY_PATH "$LIBRARY_PATH"
+  export_environment_variable INFOPATH "$INFOPATH"
+  export_environment_variable MANPATH "$MANPATH"
+  export_environment_variable ONEAPI_ROOT "$ONEAPI_ROOT"
+  export_environment_variable CLASSPATH "$CLASSPATH"
+  export_environment_variable CMAKE_PREFIX_PATH "$CMAKE_PREFIX_PATH"
+  export_environment_variable OCL_ICD_FILENAMES "$OCL_ICD_FILENAMES"
+  export_environment_variable INTEL_PYTHONHOME "$INTEL_PYTHONHOME"
+  export_environment_variable CPATH "$CPATH"
+  export_environment_variable SETVARS_COMPLETED "$SETVARS_COMPLETED"
   for path in ${PATH//:/ }; do
     echo $path >> $GITHUB_PATH
   done
@@ -524,13 +530,13 @@ install_intel()
   esac
 
   if $classic; then
-    export FC="ifort"
-    export CC="icc"
-    export CXX="icpc"
+    export_environment_variable FC "ifort"
+    export_environment_variable CC "icc"
+    export_environment_variable CXX "icpc"
   else
-    export FC="ifx"
-    export CC="icx"
-    export CXX="icpx"
+    export_environment_variable FC "ifx"
+    export_environment_variable CC "icx"
+    export_environment_variable CXX "icpx"
   fi
 }
 
@@ -574,8 +580,8 @@ install_nvidiahpc_apt()
 
   # load NVIDIA HPC SDK module
   echo "Loading NVIDIA HPC SDK $version module..."
-  NVCOMPILERS=/opt/nvidia/hpc_sdk; export NVCOMPILERS
-  export MODULEPATH=$NVCOMPILERS/modulefiles:$MODULEPATH
+  export_environment_variable NVCOMPILERS "/opt/nvidia/hpc_sdk"
+  export_environment_variable MODULEPATH "$NVCOMPILERS/modulefiles:$MODULEPATH"
   module load nvhpc
   echo "NVIDIA HPC SDK $version module loaded."
 
@@ -612,36 +618,36 @@ install_nvidiahpc()
       ;;
   esac
 
-  export FC="nvfortran"
-  export CC="nvc"
-  export CXX="nvc++"
+  export_environment_variable FC "nvfortran"
+  export_environment_variable CC "nvc"
+  export_environment_variable CXX "nvc++"
 }
 
 install_lfortran_l()
 {
   local version=$1
-  export CC="gcc"
-  export CXX="g++"
-  export CONDA=conda
+  export_environment_variable CC "gcc"
+  export_environment_variable CXX "g++"
+  export_environment_variable CONDA "conda"
   $CONDA install -c conda-forge -n base -y lfortran=$version
 }
 
 install_lfortran_w()
 {
   local version=$1
-  export CC="cl"
-  export CXX="cl"
-  export CONDA=$CONDA\\Scripts\\conda  # https://github.com/actions/runner-images/blob/main/images/windows/Windows2022-Readme.md#environment-variables
+  export_environment_variable CC "cl"
+  export_environment_variable CXX "cl"
+  export_environment_variable CONDA "$CONDA\\Scripts\\conda"  # https://github.com/actions/runner-images/blob/main/images/windows/Windows2022-Readme.md#environment-variables
   $CONDA install -c conda-forge -n base -y lfortran=$version
 }
 
 install_lfortran_m()
 {
   local version=$1
-  export CC="gcc"
-  export CXX="g++"
-  export CONDA_ROOT_PREFIX=$MAMBA_ROOT_PREFIX
-  export CONDA=micromamba
+  export_environment_variable CC "gcc"
+  export_environment_variable CXX "g++"
+  export_environment_variable CONDA_ROOT_PREFIX "$MAMBA_ROOT_PREFIX"
+  export_environment_variable CONDA "micromamba"
   $CONDA install -c conda-forge -n base -y lfortran=$version
 }
 
@@ -671,5 +677,5 @@ install_lfortran()
   esac
 
   echo $($CONDA run -n base which lfortran | sed 's/lfortran//') >> $GITHUB_PATH
-  export FC="lfortran"
+  export_environment_variable FC "lfortran"
 }
